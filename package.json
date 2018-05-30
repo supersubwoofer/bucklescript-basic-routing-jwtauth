@@ -1,5 +1,5 @@
 {
-  "name": "bucklescript-tea-starter-kit",
+  "name": "bucklescript-tea-routing",
   "version": "0.1.0",
   "scripts": {
     "clean": "bsb -clean",
