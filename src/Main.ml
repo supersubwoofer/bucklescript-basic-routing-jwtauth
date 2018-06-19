@@ -6,21 +6,65 @@ open Tea.Html
 
 (* Let's create a new type here to be our main message type that is passed around *)
 type msg =
-  | Increment  (* This will be our message to increment the counter *)
-  | Decrement  (* This will be our message to decrement the counter *)
-  | Reset      (* This will be our message to reset the counter to 0 *)
-  | Set of int (* This will be out message to set the counter to a specific value *)
+  | Location_changed of Web.Location.location
   [@@bs.deriving {accessors}] (* This is a nice quality-of-life addon from Bucklescript, it will generate function names for each constructor name, optional, but nice to cut down on code, this is unused in this example but good to have regardless *)
 
-(* This is optional for such a simple example, but it is good to have an `init` function to define your initial model default values, the model for Counter is just an integer *)
-let init () = 4
+type 'a option =
+  | Some of 'a
+  | None
+
+type ('success, 'failure) result = 
+  | Ok of 'success
+  | Error of 'failure
+
+type route =
+  | Sign_up
+  | Sign_in
+  | Index
+
+type identity = {
+  user_id: string option;
+}
+
+type model = {
+  current_user: identity;
+  route: route
+}
+
+let route_of_location location =
+  let route = Js.String.split "/" location.Web.Location.hash in
+  match route with
+  | [|"#"; ""|] -> Sign_in
+  | [|"#"; "sign_in"|] -> Sign_in
+  | [|"#"; "sign_up"|] -> Sign_up
+  | [|"#"; "landing"|] -> Index
+  | _ -> Sign_up (* default route *)
+
+let location_of_route = function
+  | Sign_in -> "#/sign_in"
+  | Sign_up -> "#/sign_up"
+  | Index -> "#/landing"
+    
+let update_route model = function
+  | route when model.route = route -> model, Tea.Cmd.none
+  | Sign_up -> { model with route = Sign_up }, Tea.Cmd.none
+  | Sign_in -> { model with route = Sign_in }, Tea.Cmd.none
+  | Index -> { model with route = Index }, Tea.Cmd.none
+
+let init_model =
+  { current_user = {user_id = None}
+  ; route = Sign_up
+  }
+
+let init () location =
+  let model, cmd =
+    route_of_location location |> update_route init_model in
+  model, cmd
 
 (* This is the central message handler, it takes the model as the first argument *)
 let update model = function (* These should be simple enough to be self-explanatory, mutate the model based on the message, easy to read and follow *)
-  | Increment -> model + 1
-  | Decrement -> model - 1
-  | Reset -> 0
-  | Set v -> v
+  | Location_changed location ->
+    route_of_location location |> update_route model
 
 (* This is just a helper function for the view, a simple function that returns a button based on some argument *)
 let view_button title msg =
@@ -37,16 +81,19 @@ let view model =
     []
     [ span
         [ style "text-weight" "bold" ]
-        [ text (string_of_int model) ]
+        [ text (location_of_route model.route) ]
     ; br []
-    ; view_button "Increment" Increment
+    ; a [ "#/sign_in" |> href ]
+        [ text "sign_in" ]
     ; br []
-    ; view_button "Decrement" Decrement
+    ; a [ "#/sign_up" |> href ]
+        [ text "sign_up" ]
     ; br []
-    ; view_button "Set to 42" (Set 42)
-    ; br []
-    ; if model <> 0 then view_button "Reset" Reset else noNode
+    ; a [ "#/landing" |> href ]
+        [ text "landing" ]
     ]
+
+let subscriptions _model = Tea.Sub.none
 
 (* This is the main function, it can be named anything you want but `main` is traditional.
   The Program returned here has a set of callbacks that can easily be called from
@@ -55,8 +102,10 @@ let view model =
   constructors to the messages to javascript via the above [@@bs.deriving {accessors}]
   attribute on the `msg` type or manually, that way even javascript can use it safely. *)
 let main =
-  beginnerProgram { (* The beginnerProgram just takes a set model state and the update and view functions *)
-    model = init (); (* Since model is a set value here, we call our init function to generate that value *)
-    update;
-    view;
-  }
+  Tea.Navigation.navigationProgram location_changed
+    { init
+    ; update
+    ; view
+    ; subscriptions = subscriptions
+    ; shutdown = (fun _ -> Tea.Cmd.none)
+    }
