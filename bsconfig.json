@@ -2,7 +2,10 @@
   "name": "bucklescript-tea-starter-kit",
   "version": "0.1.0",
   "sources": [
-    "src"
+    {
+      "dir": "src",
+      "subdirs": true // recursively builds every subdirectory
+    }
   ],
   "package-specs": [{"module": "es6", "in-source": true}],
   "suffix": ".bs.js",
