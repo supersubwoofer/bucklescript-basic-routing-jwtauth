@@ -2,7 +2,7 @@
 
 * sign_up
 * sign_in
-* landing
+* Index
 
 # Organisation
 

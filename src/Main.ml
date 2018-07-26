@@ -12,7 +12,7 @@ let init_model =
 
 let init () location =
   let model, cmd =
-    route_of_location location |> update_route init_model in
+    route_of_location location None |> update_route init_model in
     model, cmd
 
 (* This is the central message handler, it takes the model as the first argument *)
@@ -26,8 +26,9 @@ let update model = function (* These should be simple enough to be self-explanat
       } in
     { model with signin_model; current_user }, Cmd.map signin_msg cmd
   | Location_changed location ->
-    route_of_location location |> update_route model
-
+    model.current_user.jwt 
+    |> route_of_location location 
+    |> update_route model
 
 (* This is the main callback to generate the virtual-dom.
   This returns a virtual-dom node that becomes the view, only changes from call-to-call are set on the real DOM for efficiency, this is also only called once per frame even with many messages sent in within that frame, otherwise does nothing *)

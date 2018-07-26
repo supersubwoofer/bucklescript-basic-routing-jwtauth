@@ -47,12 +47,13 @@ let update model = function
     { model with password }, Cmd.none
   | Signin_submit ->
     begin match model.jwt with
-      | Loading | Received _ -> model, Cmd.none
+      | Loading -> model, Cmd.none
+      | Received _ -> model, Tea.Navigation.modifyUrl "#/index"
       | Idle | Failed _ ->
         begin match model.user_id, model.password with
           | Some userid, Some password -> 
             model, identity_jwt_request userid password identify_user
-          | _ ->  model, Cmd.none
+          | _ -> model, Cmd.none
         end
     end
   | Identify_user (Ok data) -> 
@@ -61,9 +62,10 @@ let update model = function
     Storage.save_local "jwt" (value_from_json_str data)
     |> Tea_task.attempt jwt_saved
   | Identify_user (Error _e) -> 
+    Printf.sprintf "User is not identified" |> alert;
     let jwt = Failed "failed" in 
     { model with jwt }, Cmd.none
-  | Jwt_saved (Ok _) -> Printf.sprintf "jwt successfully saved" |> alert; model, Cmd.none
+  | Jwt_saved (Ok _) -> model, Tea.Navigation.modifyUrl "#/index"
   | Jwt_saved (Error e) ->
     Printf.sprintf "jwt couldn't be saved because of error %s" e |> alert;
     model, Cmd.none

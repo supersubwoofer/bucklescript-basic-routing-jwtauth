@@ -26,23 +26,28 @@ type model =
 ; route: route
 }
 
+let skip_signin_to_index jwt =
+  match jwt with
+  | Some _value -> Index
+  | None -> Sign_in
+
 (* route helpers *)
-let route_of_location location =
+let route_of_location location jwt =
   let route = Js.String.split "/" location.Web.Location.hash in
   match route with
-  | [|"#"; ""|] -> Sign_in
-  | [|"#"; "sign_in"|] -> Sign_in
+  | [|"#"; ""|] -> skip_signin_to_index jwt
+  | [|"#"; "sign_in"|] -> skip_signin_to_index jwt
   | [|"#"; "sign_up"|] -> Sign_up
-  | [|"#"; "landing"|] -> Index
+  | [|"#"; "index"|] -> Index
   | _ -> Sign_up (* default route *)
 
 let location_of_route = function
   | Sign_in -> "#/sign_in"
   | Sign_up -> "#/sign_up"
-  | Index -> "#/landing"
+  | Index -> "#/index"
     
 let update_route model = function
   | route when model.route = route -> model, Cmd.none
   | route -> 
-  { model with route = route }, 
-  location_of_route route |> Tea.Navigation.modifyUrl
+    { model with route = route }, 
+    location_of_route route |> Tea.Navigation.modifyUrl
