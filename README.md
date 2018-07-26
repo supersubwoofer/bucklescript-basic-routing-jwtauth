@@ -1,4 +1,6 @@
-# Routing
+# Basic Routing, jwt authentication and Local Storage
+
+# Routes
 
 * sign_up
 * sign_in
