@@ -17,8 +17,8 @@ let post_request url body =
     ; withCredentials = false
     }
 
-let identity_jwt_request userid password identify_user =
+let identity_jwt_request userid password identify_user_callback =
   post_request 
     (Config.base_url ^ "/api/auth/identity/callback")
     (StringBody ("{\"user\": {\"email\": \"" ^ userid ^ "\", \"password\": \"" ^ password ^ "\"}}"))
-    |> Http.send identify_user
+    |> Http.send identify_user_callback

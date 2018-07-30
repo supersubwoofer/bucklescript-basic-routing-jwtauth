@@ -4,6 +4,7 @@ open Tea
 type msg =
   | Signin_msg of SignIn.msg
   | Signup_msg of SignUp.msg
+  | Auth_container_msg of AuthenticatedContainer.msg
   | Location_changed of Web.Location.location
   [@@bs.deriving {accessors}]
   
@@ -26,19 +27,22 @@ type model =
 ; route: route
 }
 
-let skip_signin_to_index jwt =
-  match jwt with
+let skip_to_index dest = function 
   | Some _value -> Index
+  | None -> dest
+
+let skip_to_signin dest = function 
+  | Some _value -> dest
   | None -> Sign_in
 
 (* route helpers *)
 let route_of_location location jwt =
   let route = Js.String.split "/" location.Web.Location.hash in
   match route with
-  | [|"#"; ""|] -> skip_signin_to_index jwt
-  | [|"#"; "sign_in"|] -> skip_signin_to_index jwt
-  | [|"#"; "sign_up"|] -> Sign_up
-  | [|"#"; "index"|] -> Index
+  | [|"#"; ""|] -> skip_to_index Sign_in jwt
+  | [|"#"; "sign_in"|] -> skip_to_index Sign_in jwt
+  | [|"#"; "sign_up"|] -> skip_to_index Sign_up jwt
+  | [|"#"; "index"|] -> skip_to_signin Index jwt
   | _ -> Sign_up (* default route *)
 
 let location_of_route = function

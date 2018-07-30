@@ -27,28 +27,29 @@ let init =
   ; jwt = Idle 
   }
 
-let request_token_to_option rq_token =
-  match rq_token with
+let request_token_to_option = function
   | Received data -> Some data
   | _ -> None
 
 let decode_jwt jwt_str =
   decodeString (field "token" string) jwt_str
 
-let value_from_json_str json_str =
-  match decode_jwt json_str with
+let value_from_jwt_str json_str =
+  let result = decode_jwt json_str in
+  match result with
   | Ok value -> value
   | Error _e -> ""
 
 let update model = function 
-  | Update_userid uid -> let user_id = Some uid in
+  | Update_userid uid -> 
+    let user_id = Some uid in
     { model with user_id }, Cmd.none
-  | Update_password pwd -> let password = Some pwd in
+  | Update_password pwd ->
+    let password = Some pwd in
     { model with password }, Cmd.none
   | Signin_submit ->
     begin match model.jwt with
-      | Loading -> model, Cmd.none
-      | Received _ -> model, Tea.Navigation.modifyUrl "#/index"
+      | Loading | Received _ -> model, Cmd.none
       | Idle | Failed _ ->
         begin match model.user_id, model.password with
           | Some userid, Some password -> 
@@ -58,8 +59,7 @@ let update model = function
     end
   | Identify_user (Ok data) -> 
     let jwt = Received data in
-    { model with jwt }, 
-    Storage.save_local "jwt" (value_from_json_str data)
+    { model with jwt }, (value_from_jwt_str data) |> Storage.save_local "jwt"
     |> Tea_task.attempt jwt_saved
   | Identify_user (Error _e) -> 
     Printf.sprintf "User is not identified" |> alert;

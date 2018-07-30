@@ -10,6 +10,12 @@ let init_model =
   ; route = Sign_up
   }
 
+let signout_model =
+  { signin_model = SignIn.init
+  ; current_user = { user_id = None; jwt = None }
+  ; route = Sign_in
+  }
+
 let init () location =
   let model, cmd =
     route_of_location location None |> update_route init_model in
@@ -25,6 +31,7 @@ let update model = function (* These should be simple enough to be self-explanat
       ; jwt = (SignIn.request_token_to_option signin_model.jwt) 
       } in
     { model with signin_model; current_user }, Cmd.map signin_msg cmd
+  | Auth_container_msg _msg -> signout_model, Cmd.none
   | Location_changed location ->
     model.current_user.jwt 
     |> route_of_location location 
@@ -37,7 +44,9 @@ let view model =
   match route with
   | Sign_in -> SignIn.view model.signin_model |> map signin_msg
   | Sign_up -> SignUp.view model |> map signup_msg
-  | Index -> AuthenticatedContainer.view model
+  | Index -> 
+  AuthenticatedContainer.view (Index.view model) model.current_user.jwt
+  |> map auth_container_msg
 
 let subscriptions _model = Tea.Sub.none
 
