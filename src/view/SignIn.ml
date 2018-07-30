@@ -47,15 +47,15 @@ let update model = function
   | Update_password pwd ->
     let password = Some pwd in
     { model with password }, Cmd.none
-  | Signin_submit ->
+  | Signin_submit -> 
     begin match model.jwt with
-      | Loading | Received _ -> model, Cmd.none
-      | Idle | Failed _ ->
-        begin match model.user_id, model.password with
-          | Some userid, Some password -> 
-            model, identity_jwt_request userid password identify_user
-          | _ -> model, Cmd.none
-        end
+    | Loading | Received _ -> model, Cmd.none
+    | Idle | Failed _ ->
+      begin match model.user_id, model.password with 
+      | Some userid, Some password -> 
+        model, identity_jwt_request userid password identify_user
+      | _ -> model, Cmd.none 
+      end
     end
   | Identify_user (Ok data) -> 
     let jwt = Received data in

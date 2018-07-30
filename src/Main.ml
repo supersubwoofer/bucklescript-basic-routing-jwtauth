@@ -45,8 +45,8 @@ let view model =
   | Sign_in -> SignIn.view model.signin_model |> map signin_msg
   | Sign_up -> SignUp.view model |> map signup_msg
   | Index -> 
-  AuthenticatedContainer.view (Index.view model) model.current_user.jwt
-  |> map auth_container_msg
+    AuthenticatedContainer.view (Index.view model) model.current_user.jwt
+    |> map auth_container_msg
 
 let subscriptions _model = Tea.Sub.none
 
