@@ -24,6 +24,7 @@ lib/
 .vscode
 node_modules
 release/main.js
+dev/main.js
 .merlin
 yarn.lock
 package-lock.json

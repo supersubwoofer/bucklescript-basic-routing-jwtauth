@@ -5,25 +5,25 @@
     "clean": "bsb -clean",
     "clean:all": "bsb -clean-world",
     "build:bsb": "bsb -make-world",
-    "build:js": "rollup -c",
-    "serve": "serve release",
+    "build:js": "rollup --config rollup.config.prod.js",
     "build": "run-s build:bsb build:js",
+    "clean:build": "run-s clean:all build:bsb build:js",
+    "serve": "serve dev",
     "watch:bsb": "bsb -make-world -w",
-    "watch:js": "rollup -c -w",
-    "watch": "run-p watch:bsb watch:js serve",
-    "start": "run-s watch"
+    "watch:js": "rollup -w --config rollup.config.dev.js",
+    "watch": "run-p watch:bsb watch:js serve"
   },
   "keywords": [
     "Bucklescript"
   ],
   "license": "MIT",
   "devDependencies": {
-    "bs-platform": "^3.0.0",
-    "bucklescript-tea": "^0.7.3",
-    "npm-run-all": "^4.1.3",
-    "rollup": "^0.52.3",
-    "rollup-plugin-livereload": "^0.6.0",
-    "rollup-plugin-node-resolve": "^3.3.0",
-    "serve": "^6.5.8"
+    "bs-platform": "^5.0.6",
+    "bucklescript-tea": "^0.11.2",
+    "npm-run-all": "^4.1.5",
+    "rollup": "^1.16.7",
+    "rollup-plugin-livereload": "^1.0.1",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "serve": "^11.0.2"
   }
 }

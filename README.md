@@ -35,3 +35,7 @@ npm run build
 ```
 npm run watch
 ```
+
+## Reference
+
+* [1] Daniel Quernheim, (January 2018) [CHESS IN BUCKLESCRIPT-TEA](https://quernd.github.io/tutorials/tea-chess/index.html)
